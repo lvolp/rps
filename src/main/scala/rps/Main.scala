@@ -13,7 +13,6 @@ object Game {
   def play() : Unit = {
 
   println("Choose Rock (0),PAPER (1),SCISSOR (2)")
-  //val move = Move.parse(readLine)
   val move = CaseEnumIndex[Move].caseFromIndex(readLine())
 
   val computerMove = generateRandom()
