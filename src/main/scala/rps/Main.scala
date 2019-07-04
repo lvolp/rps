@@ -1,23 +1,55 @@
 package rps
 import scala.io.StdIn.readLine
 import scala.util.Random
+import Move._
 object Main extends App {
   Game.play
 }
 
 object Game {
   def play() : Unit = {
-    val moveMap = Map("0" -> "Rock", "1" -> "Paper", "2" -> "Scissor")
-    println("Choose Rock (0), Paper(1), Scissor(2)")
-    val move = moveMap.getOrElse(readLine(),"None")
-    val computerMove = moveMap(Random.nextInt(3).toString)
-    val resultString = s"$move VS $computerMove -> "
-    val result =(move, computerMove) match {
-      case (x,y) if x == y => "Draw!"
-      case ("Rock","Paper") | ("Paper","Scissor") | ("Scissor","Rock") => "You lost!"
-      case ("Rock","Scissor") | ("Paper","Rock") | ("Scissor","Paper")  => "You win!"
-      case (_,_) =>  "Not an Option!"
-    }
-    println(s"$resultString $result")
+
+  println("Choose Rock (0),PAPER (1),SCISSOR (2)")
+  val move = Move.parse(readLine)
+  val computerMove = Move.generateRandom()
+
+  val output = move.map(m => {
+  val resultString = s"${m} VS ${computerMove}-> "
+  val result =(m, computerMove) match {
+        case (x,y) if x == y => "Draw!"
+        case (ROCK,PAPER) | (PAPER,SCISSOR) | (SCISSOR,ROCK) => "You lost!"
+        case (ROCK,SCISSOR) | (PAPER,ROCK) | (SCISSOR,PAPER)  => "You win!"
+        case _ => "Unknown combination!"
+      }    
+      s"$resultString $result"
+    }).getOrElse("Not an Option!")
+    println(output)
   }
+}
+
+object Move {  
+  sealed trait Move
+  
+  case object ROCK extends Move
+  case object PAPER extends Move
+  case object SCISSOR extends Move 
+
+  def generateRandom() = {
+    Random.nextInt(3) match {
+      case 0 => ROCK
+      case 1 => PAPER
+      case 2 => SCISSOR
+      case _ => throw new Exception("errorissimo")
+    }
+  }
+
+  def parse(moveCode : String) = {
+    moveCode match {
+      case "0" => Option(ROCK)
+      case "1" => Option(PAPER)
+      case "2" => Option(SCISSOR)
+      case _ => None
+    }
+  }
+  
 }
