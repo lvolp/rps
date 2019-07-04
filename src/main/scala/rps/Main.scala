@@ -14,12 +14,8 @@ object Game {
     val resultString = s"$move VS $computerMove -> "
     val result =(move, computerMove) match {
       case (x,y) if x == y => "Draw!"
-      case ("Rock","Paper") => "You lost!"
-      case ("Rock","Scissor") => "You win!"
-      case ("Paper","Rock") => "You win!"
-      case ("Paper","Scissor") => "You lost!"
-      case ("Scissor","Rock") => "You lost!"
-      case ("Scissor","Paper") => "You win!"
+      case ("Rock","Paper") | ("Paper","Scissor") | ("Scissor","Rock") => "You lost!"
+      case ("Rock","Scissor") | ("Paper","Rock") | ("Scissor","Paper")  => "You win!"
       case (_,_) =>  "Not an Option!"
     }
     println(s"$resultString $result")
