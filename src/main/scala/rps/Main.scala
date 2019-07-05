@@ -45,7 +45,6 @@ object WebServer extends App with RouterDerivationModule {
     config = Config("localhost", 8080),
     routers = List(gameRouter)
   )
-
 }
 
 @path("rps")
@@ -61,12 +60,12 @@ class GameApiImpl(implicit ec: ExecutionContext) extends GameApi {
     val result =(userMove, computerMove) match {
         case (x,y) if x == y => Draw
         case (Rock,Paper) | (Paper,Scissors) | (Scissors,Rock) => Lose
-        case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper)  => Win   
+        case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper) => Win   
     }    
     Right(Response tupled (userMove,computerMove,result))
   }
 
-   def generateRandom() = {
+  def generateRandom() = {
     Random.nextInt(3) match {
       case 0 => Rock
       case 1 => Paper
