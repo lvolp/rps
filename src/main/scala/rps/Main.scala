@@ -20,7 +20,7 @@ object Main extends App {
 }
 
 object Game {
-  def play(move : Move) : (Move,Move,Result) = {
+  def play(move : Move) : Response = {
     val computerMove = generateRandom()
     val result =(move, computerMove) match {
         case (x,y) if x == y => Draw
@@ -28,7 +28,7 @@ object Game {
         case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper)  => Win
         
     }    
-    return (move,computerMove,result)
+    Response tupled (move,computerMove,result)
 }
 
   def generateRandom() = {
@@ -65,13 +65,15 @@ object WebServer {
       path("play") {
         post {
            entity(as[Request]) { move =>
-             complete(Response tupled Game.play(move.userMove))
+             complete(Game.play(move.userMove))
         }
         }~ options(complete())
       }
       }
-    val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+    val host = "localhost"
+    val port = 8080  
+    val bindingFuture = Http().bindAndHandle(route, host, port)
+    println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
     bindingFuture
       .flatMap(_.unbind()) // trigger unbinding from the port
