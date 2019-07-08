@@ -20,7 +20,7 @@ import akka.stream.ActorMaterializer
 import wiro.Config
 import wiro.server.akkaHttp._
 
-import rps.GameApi
+
 import akka.http.scaladsl.model._
 
 
