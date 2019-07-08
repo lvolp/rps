@@ -1,5 +1,4 @@
 package rps
-import scala.util.Random
 import io.buildo.enumero.annotations.enum
 import io.buildo.enumero.{CaseEnumIndex, CaseEnumSerialization}
 import Move._
@@ -36,7 +35,11 @@ object WebServer extends App with RouterDerivationModule {
         ContentType(MediaTypes.`application/json`),
         s"""{"error":${error.getMessage()}}"""))
 
-  val gameRouter = deriveRouter[GameApi](new GameApiImpl)
+  val gameRepository : GameRepository = new GameRepositoryImpl
+  val gameService : GameService = new GameServiceImpl(gameRepository)
+  val gameController = new GameControllerImpl(gameService)
+  val gameRouter = deriveRouter[GameController](gameController)
+
 
   new HttpRPCServer(
     config = Config("localhost", 8080),
