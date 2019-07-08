@@ -1,50 +1,53 @@
 package rps
-import scala.io.StdIn.readLine
 import scala.util.Random
 import io.buildo.enumero.annotations.enum
 import io.buildo.enumero.{CaseEnumIndex, CaseEnumSerialization}
 import Move._
+import Response._
 import Result._
-import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import io.circe.generic.auto._
 import io.buildo.enumero.circe._
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import scala.io.StdIn
+import wiro.annotation._
+import scala.concurrent.{ExecutionContext, Future}
+import wiro.Config
+import wiro.server.akkaHttp._
+import wiro.server.akkaHttp.FailSupport._
 
-object Main extends App {
-  WebServer.run
-}
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import wiro.Config
+import wiro.server.akkaHttp._
 
-object Game {
-  def play(move : Move) : Response = {
-    val computerMove = generateRandom()
-    val result =(move, computerMove) match {
-        case (x,y) if x == y => Draw
-        case (Rock,Paper) | (Paper,Scissors) | (Scissors,Rock) => Lose
-        case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper)  => Win
-        
-    }    
-    Response tupled (move,computerMove,result)
-}
 
-  def generateRandom() = {
-    Random.nextInt(3) match {
-      case 0 => Rock
-      case 1 => Paper
-      case 2 => Scissors
-      case _ => throw new Exception("errorissimo")
-    }
-  } 
+import akka.http.scaladsl.model._
+
+
+object WebServer extends App with RouterDerivationModule {
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
+  implicit val ec = system.dispatcher
+
+  implicit def throwableResponse: ToHttpResponse[Throwable] = error => 
+     HttpResponse(
+      status = StatusCodes.InternalServerError,
+      entity = HttpEntity(
+        ContentType(MediaTypes.`application/json`),
+        s"""{"error":${error.getMessage()}}"""))
+
+  val gameRouter = deriveRouter[GameApi](new GameApiImpl)
+
+  new HttpRPCServer(
+    config = Config("localhost", 8080),
+    routers = List(gameRouter)
+  )
 }
 
 @enum trait Move {
-  object Rock 
-  object Paper 
-  object Scissors 
+  object Rock
+  object Paper
+  object Scissors
 }
 
 @enum trait Result {
@@ -53,33 +56,4 @@ object Game {
   object Draw
 }
 
-object WebServer {
-  def run()= {
-
-    implicit val system = ActorSystem("rps")
-    implicit val materializer = ActorMaterializer()
-    implicit val executionContext = system.dispatcher
-
-    val route =
-      pathPrefix("rps") {
-      path("play") {
-        post {
-           entity(as[Request]) { move =>
-             complete(Game.play(move.userMove))
-        }
-        }~ options(complete())
-      }
-      }
-    val host = "localhost"
-    val port = 8080  
-    val bindingFuture = Http().bindAndHandle(route, host, port)
-    println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
-  }
-}
-
-case class Request (userMove : Move)
 case class Response (userMove: Move, computerMove: Move, result: Result)
