@@ -1,21 +1,20 @@
 package rps
-
 import scala.collection.concurrent.TrieMap
 
-trait GameRepository {
-    def saveGame(gameResult: Response) : Unit
-    def getGame : Option[Response]
+trait GameRepository  {
+    def saveGame(id:GameId,gameResult: Response) : Unit
+    def getGame(id: GameId) : Option[Response]
 
 }
 
 class GameRepositoryImpl extends GameRepository {
-  private val map = TrieMap.empty[String,Response]
+  private val map = TrieMap.empty[GameId,Response]
   
-  override def saveGame(gameResult: Response) = {
-    map.put("game",gameResult)
+  override def saveGame(id:GameId, gameResult: Response) = {
+    map.put(id,gameResult)
   }
 
-  override def getGame : Option[Response] = {
-    map.get("game")
+  override def getGame(id: GameId) : Option[Response] = {
+    map.get(id)
   }
 }
