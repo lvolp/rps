@@ -13,15 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import wiro.Config
 import wiro.server.akkaHttp._
 import wiro.server.akkaHttp.FailSupport._
-
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import wiro.Config
 import wiro.server.akkaHttp._
-
-
 import akka.http.scaladsl.model._
-
 
 object WebServer extends App with RouterDerivationModule {
   implicit val system = ActorSystem()
@@ -39,7 +35,6 @@ object WebServer extends App with RouterDerivationModule {
   val gameService : GameService = new GameServiceImpl(gameRepository)
   val gameController = new GameControllerImpl(gameService)
   val gameRouter = deriveRouter[GameController](gameController)
-
 
   new HttpRPCServer(
     config = Config("localhost", 8080),
@@ -60,3 +55,15 @@ object WebServer extends App with RouterDerivationModule {
 }
 
 case class Response (userMove: Move, computerMove: Move, result: Result)
+
+trait ID {
+  type IdType
+  def generateGameId (game : Response) :IdType
+}
+
+object HashId extends ID {
+  type IdType = Int
+  def generateGameId (game: Response) : IdType = {
+      game.##
+  }
+}

@@ -1,27 +1,30 @@
 package rps
 import Move._
 import Result._
-
+import HashId._
 import scala.util.Random
 
 trait GameService {
-    def play(userMove : Move) : Unit
-    def result : Option[Response]
+    def play(userMove : Move) : IdType
+    def result(id: IdType) : Option[Response]
 }
 
 class GameServiceImpl(gr: GameRepository) extends GameService {
-  override def play(userMove : Move) : Unit = {
+  override def play(userMove : Move) : IdType = {
    val computerMove = generateRandom()
     val result =(userMove, computerMove) match {
         case (x,y) if x == y => Draw
         case (Rock,Paper) | (Paper,Scissors) | (Scissors,Rock) => Lose
         case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper) => Win   
     }    
-    gr.saveGame(Response tupled (userMove,computerMove,result))
+    val game = Response(userMove,computerMove,result)
+    val id = generateGameId(game)
+    gr.saveGame(id,game)
+    id
   }
 
-  override def result : Option[Response] = {
-    gr.getGame
+  override def result(id : IdType) : Option[Response] = {
+    gr.getGame(id)
   }
 
    def generateRandom() = {
@@ -32,4 +35,6 @@ class GameServiceImpl(gr: GameRepository) extends GameService {
       case _ => throw new Exception("errorissimo")
     }
    }
+
+ 
 }
