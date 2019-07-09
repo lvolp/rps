@@ -11,14 +11,14 @@ import io.buildo.enumero.{CaseEnumIndex, CaseEnumSerialization}
 @path("rps")
 trait GameController {
  @command
-  def play(userMove:Move): Future[Either[Throwable,GameId]]
+  def play(userMove:Move): Future[Either[Throwable,Int]]
 
   @query
   def result(id: Int): Future[Either[Throwable,Response]]
 }
 
 class GameControllerImpl(gs: GameService)(implicit ec: ExecutionContext) extends GameController  {
-  override def play(userMove:Move) : Future[Either[Throwable,GameId]] = Future.successful(Right(gs.play(userMove)))
+  override def play(userMove:Move) : Future[Either[Throwable,Int]] = Future.successful(Right(gs.play(userMove).gameId))
   
 
   override def result(id: Int) : Future[Either[Throwable,Response]] = Future.successful(
