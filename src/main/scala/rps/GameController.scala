@@ -7,26 +7,24 @@ import wiro.Config
 import wiro.server.akkaHttp._
 import wiro.server.akkaHttp.FailSupport._
 import io.buildo.enumero.{CaseEnumIndex, CaseEnumSerialization}
-import ID._
 
 @path("rps")
-trait GameController  {
+trait GameController {
  @command
-  def play(userMove:Move): Future[Either[Throwable,IdType]]
+  def play(userMove:Move): Future[Either[Throwable,GameId]]
 
   @query
-  def result(id: IdType): Future[Either[Throwable,Response]]
+  def result(id: Int): Future[Either[Throwable,Response]]
 }
 
-class GameControllerImpl(gs: GameService)(implicit ec: ExecutionContext) extends GameController {
-  override def play(userMove:Move) : Future[Either[Throwable,IdType]] = Future {
-    Right(gs.play(userMove))
-  }
+class GameControllerImpl(gs: GameService)(implicit ec: ExecutionContext) extends GameController  {
+  override def play(userMove:Move) : Future[Either[Throwable,GameId]] = Future.successful(Right(gs.play(userMove)))
+  
 
-  override def result(id: IdType) : Future[Either[Throwable,Response]] = Future {
-    gs.result(id) match {
+  override def result(id: Int) : Future[Either[Throwable,Response]] = Future.successful(
+    gs.result(GameId(id)) match {
         case Some(x) => Right(x)
         case None => Left(new Throwable("Error"))
     }
-  }    
+  )
 }

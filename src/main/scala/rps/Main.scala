@@ -19,6 +19,8 @@ import wiro.Config
 import wiro.server.akkaHttp._
 import akka.http.scaladsl.model._
 
+import java.util.concurrent.atomic.AtomicInteger
+
 object WebServer extends App with RouterDerivationModule {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -56,16 +58,16 @@ object WebServer extends App with RouterDerivationModule {
 
 case class Response (userMove: Move, computerMove: Move, result: Result)
 
-trait IDTrait {
-  type IdType
-  def generateGameId (game: Response) : IdType
+
+
+trait IdGenerator {
+
+  private val idValue = new AtomicInteger()
+
+  def generateGameId (game: Response) : GameId = {
+    GameId(idValue.getAndIncrement)
+  }
+
 }
 
-trait HashId {
-  type IdType = Int
-  def generateGameId (game: Response) : IdType = {
-    game.##
-}
-}
-
-object ID extends IDTrait with HashId
+case class GameId(gameId: Int) extends AnyVal

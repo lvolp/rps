@@ -1,17 +1,16 @@
 package rps
 import Move._
 import Result._
-import ID._
 import scala.util.Random
 
 trait GameService {
-    def play(userMove : Move) : IdType
-    def result(id: IdType) : Option[Response]
+    def play(userMove : Move) : GameId
+    def result(id: GameId) : Option[Response]
 }
 
-class GameServiceImpl(gr: GameRepository) extends GameService {
-  override def play(userMove : Move) : IdType = {
-   val computerMove = generateRandom()
+class GameServiceImpl(gr: GameRepository) extends GameService with IdGenerator {
+  override def play(userMove : Move) : GameId = {
+    val computerMove = generateRandom()
     val result =(userMove, computerMove) match {
         case (x,y) if x == y => Draw
         case (Rock,Paper) | (Paper,Scissors) | (Scissors,Rock) => Lose
@@ -23,18 +22,16 @@ class GameServiceImpl(gr: GameRepository) extends GameService {
     id
   }
 
-  override def result(id : IdType) : Option[Response] = {
+  override def result(id : GameId) : Option[Response] = {
     gr.getGame(id)
   }
 
-   def generateRandom() = {
+  def generateRandom() = {
     Random.nextInt(3) match {
       case 0 => Rock
       case 1 => Paper
       case 2 => Scissors
       case _ => throw new Exception("errorissimo")
     }
-   }
-
- 
+  } 
 }
