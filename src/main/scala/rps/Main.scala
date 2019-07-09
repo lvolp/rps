@@ -56,14 +56,16 @@ object WebServer extends App with RouterDerivationModule {
 
 case class Response (userMove: Move, computerMove: Move, result: Result)
 
-trait ID {
+trait IDTrait {
   type IdType
-  def generateGameId (game : Response) :IdType
+  def generateGameId (game: Response) : IdType
 }
 
-object HashId extends ID {
+trait HashId {
   type IdType = Int
   def generateGameId (game: Response) : IdType = {
-      game.##
-  }
+    game.##
 }
+}
+
+object ID extends IDTrait with HashId

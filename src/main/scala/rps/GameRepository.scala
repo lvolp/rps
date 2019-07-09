@@ -1,5 +1,5 @@
 package rps
-import HashId._
+import ID._
 import scala.collection.concurrent.TrieMap
 
 trait GameRepository  {

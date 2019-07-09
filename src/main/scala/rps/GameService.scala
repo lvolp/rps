@@ -1,7 +1,7 @@
 package rps
 import Move._
 import Result._
-import HashId._
+import ID._
 import scala.util.Random
 
 trait GameService {

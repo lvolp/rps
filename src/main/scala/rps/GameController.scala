@@ -7,7 +7,7 @@ import wiro.Config
 import wiro.server.akkaHttp._
 import wiro.server.akkaHttp.FailSupport._
 import io.buildo.enumero.{CaseEnumIndex, CaseEnumSerialization}
-import HashId._
+import ID._
 
 @path("rps")
 trait GameController  {
