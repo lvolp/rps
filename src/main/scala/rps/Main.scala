@@ -33,7 +33,7 @@ object WebServer extends App with RouterDerivationModule {
         ContentType(MediaTypes.`application/json`),
         s"""{"error":${error.getMessage()}}"""))
 
-  val gameRepository : GameRepository = new GameRepositoryImpl
+  val gameRepository : GameRepository = GameRepositoryImpl
   val gameService : GameService = new GameServiceImpl(gameRepository)
   val gameController = new GameControllerImpl(gameService)
   val gameRouter = deriveRouter[GameController](gameController)
@@ -57,17 +57,3 @@ object WebServer extends App with RouterDerivationModule {
 }
 
 case class Response (userMove: Move, computerMove: Move, result: Result)
-
-
-
-trait IdGenerator {
-
-  private val idValue = new AtomicInteger()
-
-  def generateGameId (game: Response) : GameId = {
-    GameId(idValue.getAndIncrement)
-  }
-
-}
-
-case class GameId(gameId: Int) extends AnyVal

@@ -2,14 +2,17 @@ package rps
 import Move._
 import Result._
 import scala.util.Random
-
+import scala.concurrent.{Future, ExecutionContext, Await}
+import scala.util.{Success, Failure}
+import scala.concurrent.duration._
 trait GameService {
-    def play(userMove : Move) : GameId
-    def result(id: GameId) : Option[Response]
+    def play(userMove : Move)(implicit ec: ExecutionContext) : Future[Int]
+    def result(id: Int) : Future[Option[Response]]
 }
 
-class GameServiceImpl(gr: GameRepository) extends GameService with IdGenerator {
-  override def play(userMove : Move) : GameId = {
+class GameServiceImpl(gr: GameRepository) extends GameService {
+  
+  def play(userMove : Move)(implicit ec: ExecutionContext) : Future[Int] = {
     val computerMove = generateRandom()
     val result =(userMove, computerMove) match {
         case (x,y) if x == y => Draw
@@ -17,12 +20,10 @@ class GameServiceImpl(gr: GameRepository) extends GameService with IdGenerator {
         case (Rock,Scissors) | (Paper,Rock) | (Scissors,Paper) => Win   
     }    
     val game = Response(userMove,computerMove,result)
-    val id = generateGameId(game)
-    gr.saveGame(id,game)
-    id
-  }
+    gr.saveGame(game)
+   }
 
-  override def result(id : GameId) : Option[Response] = {
+  override def result(id : Int) : Future[Option[Response]] = {
     gr.getGame(id)
   }
 
