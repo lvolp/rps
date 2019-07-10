@@ -22,3 +22,4 @@ project/plugins/project/
 .DS_Store
 .bloop/*
 .metals/*
+project/.bloop/rps-build.json

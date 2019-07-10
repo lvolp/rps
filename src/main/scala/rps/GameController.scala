@@ -2,6 +2,7 @@ package rps
 
 import io.circe.generic.auto._
 import wiro.annotation._
+
 import scala.concurrent.{ExecutionContext, Future}
 import wiro.Config
 import wiro.server.akkaHttp._
@@ -18,13 +19,15 @@ trait GameController {
 }
 
 class GameControllerImpl(gs: GameService)(implicit ec: ExecutionContext) extends GameController  {
-  override def play(userMove:Move) : Future[Either[Throwable,Int]] = Future.successful(Right(gs.play(userMove).gameId))
+  override def play(userMove:Move) : Future[Either[Throwable,Int]] = gs.play(userMove) map {
+    case i:Int => Right(i)
+  }
   
 
-  override def result(id: Int) : Future[Either[Throwable,Response]] = Future.successful(
-    gs.result(GameId(id)) match {
-        case Some(x) => Right(x)
-        case None => Left(new Throwable("Error"))
+  override def result(id: Int) : Future[Either[Throwable,Response]] = 
+    gs.result(id) map {
+      case Some(x) => Right(x)
+      case None => Left(new Exception("Not found"))
     }
-  )
+  
 }
